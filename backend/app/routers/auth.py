@@ -16,6 +16,7 @@ def serialize_user(user: dict) -> UserOut:
         email=user["email"],
         phone=user.get("phone"),
         avatar=user.get("avatar"),
+        role=user.get("role", "user"),   # ← include role
     )
 
 
@@ -33,6 +34,7 @@ async def register(payload: UserRegister):
         "password": hash_password(payload.password),
         "phone": None,
         "avatar": None,
+        "role": "user",              # ← default role
         "addresses": [],
     }
     await users_collection.insert_one(user_doc)
