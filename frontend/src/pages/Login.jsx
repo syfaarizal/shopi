@@ -52,7 +52,7 @@ export default function Login() {
 
         <div className="text-center mb-6">
           <h2 className="text-xl font-bold text-ink">
-            {mode === "login" ? "Welcome Back 👋" : "Create an Account"}
+            {mode === "login" ? "Welcome Back" : "Create an Account"}
           </h2>
           <p className="text-sm text-muted mt-1">
             {mode === "login"
