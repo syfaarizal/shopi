@@ -50,3 +50,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+
+async def require_admin(current_user: dict = Depends(get_current_user)):
+    """Dependency that allows only users with role='admin'."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
