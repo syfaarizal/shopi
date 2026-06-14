@@ -14,18 +14,21 @@ function saveUsers(users) {
   localStorage.setItem("shopi-users", JSON.stringify(users));
 }
 
-// Seed a demo account so the user can log in immediately
-(function seedDemoUser() {
+// Seed demo + admin accounts and migrate existing users without role
+(function seedAndMigrate() {
   const users = loadUsers();
-  if (!users.find((u) => u.email === "demo@shopi.com")) {
+
+  // Ensure demo user exists with role
+  const demoIdx = users.findIndex((u) => u.email === "demo@shopi.com");
+  if (demoIdx === -1) {
     users.push({
       id: "user-demo",
       name: "Budi Santoso",
       email: "demo@shopi.com",
       password: "password123",
       phone: "0812-3456-7890",
-      avatar:
-        "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80",
+      role: "user",
+      avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80",
       addresses: [
         {
           id: "addr-1",
@@ -38,8 +41,28 @@ function saveUsers(users) {
         },
       ],
     });
-    saveUsers(users);
+  } else if (!users[demoIdx].role) {
+    users[demoIdx].role = "user"; // migrate
   }
+
+  // Ensure admin user exists
+  const adminIdx = users.findIndex((u) => u.email === "admin@shopi.com");
+  if (adminIdx === -1) {
+    users.push({
+      id: "user-admin",
+      name: "Admin Shopi",
+      email: "admin@shopi.com",
+      password: "admin123",
+      phone: "0811-0000-0001",
+      role: "admin",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      addresses: [],
+    });
+  } else if (users[adminIdx].role !== "admin") {
+    users[adminIdx].role = "admin"; // migrate
+  }
+
+  saveUsers(users);
 })();
 
 export const useAuthStore = create(
@@ -72,8 +95,8 @@ export const useAuthStore = create(
           email,
           password,
           phone: "",
-          avatar:
-            "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80",
+          role: "user",  // ← new users are always "user"
+          avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80",
           addresses: [],
         };
         users.push(newUser);
@@ -115,6 +138,21 @@ export const useAuthStore = create(
           users[idx] = { ...users[idx], addresses: updated.addresses };
           saveUsers(users);
         }
+      },
+
+      // Admin: change any user's role
+      setUserRole: (userId, role) => {
+        const users = loadUsers();
+        const idx = users.findIndex((u) => u.id === userId);
+        if (idx !== -1) {
+          users[idx].role = role;
+          saveUsers(users);
+        }
+      },
+
+      // Return all users (admin use only)
+      getAllUsers: () => {
+        return loadUsers().map(({ password: _pw, ...u }) => u);
       },
     }),
     { name: "shopi-auth" }
