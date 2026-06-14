@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 
 
 # ---------- Auth ----------
@@ -20,6 +20,7 @@ class UserOut(BaseModel):
     email: str
     phone: Optional[str] = None
     avatar: Optional[str] = None
+    role: str = "user"           # ← NEW: "user" | "admin"
 
 
 class TokenResponse(BaseModel):
@@ -39,6 +40,19 @@ class Address(BaseModel):
 
 
 # ---------- Products ----------
+class ProductCreate(BaseModel):               # ← NEW
+    name: str
+    category: str
+    brand: str
+    price: float
+    original_price: Optional[float] = None
+    discount: Optional[int] = None
+    stock: int = 0
+    description: str = ""
+    images: List[str] = []
+    is_flash_sale: bool = False
+
+
 class Product(BaseModel):
     id: str
     name: str
@@ -82,9 +96,13 @@ class OrderItem(BaseModel):
 class OrderCreate(BaseModel):
     items: List[OrderItem]
     address: Address
-    shipping_method: str  # "regular" | "express"
-    payment_method: str  # "bank_transfer" | "ewallet" | "card"
+    shipping_method: str
+    payment_method: str
     voucher: Optional[str] = None
+
+
+class OrderStatusUpdate(BaseModel):           # ← NEW
+    status: str  # pending, paid, shipped, delivered, cancelled
 
 
 class Order(BaseModel):
@@ -98,5 +116,16 @@ class Order(BaseModel):
     payment_method: str
     subtotal: float
     total: float
-    status: str  # pending, paid, shipped, delivered, cancelled
+    status: str
     created_at: str
+
+
+# ---------- Payments ----------
+class PaymentInitiate(BaseModel):             # ← NEW
+    order_id: str
+    method: str   # bank_transfer | ewallet | card
+    amount: float
+
+
+class PaymentConfirm(BaseModel):              # ← NEW
+    payment_id: str
