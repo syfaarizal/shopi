@@ -1,15 +1,28 @@
 import os
 import uuid
 
-import aiofiles
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+import aiofiles  # type: ignore[import]
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException  # type: ignore[import]
 
 from app.auth import require_admin
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
-UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
-ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+UPLOAD_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
+)
+ALLOWED_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+}
+CONTENT_TYPE_EXTENSIONS = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+}
 MAX_SIZE_MB = 5
 
 

@@ -2,7 +2,7 @@ import random
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException  # type: ignore[import]
 
 from app.database import orders_collection, cart_collection
 from app.auth import get_current_user
